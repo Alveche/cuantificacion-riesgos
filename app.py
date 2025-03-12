@@ -39,12 +39,13 @@ def obtener_cuestionario(riesgo):
 
 def procesar_respuestas(datos_generales, respuestas_riesgo, riesgo):
     peso_factor = 0.2  # Ajustable según modelo real
-    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float))]
+    
+    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float)) and v > 0]
     
     if valores_numericos:
         indice_riesgo = sum(valores_numericos) / len(valores_numericos) * peso_factor
     else:
-        indice_riesgo = 0.5  # Valor por defecto si no hay datos numéricos
+        indice_riesgo = 0.5  # Valor por defecto si no hay datos numéricos positivos
     
     return {"riesgo": riesgo, "indice": round(indice_riesgo, 2)}
 
@@ -75,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
