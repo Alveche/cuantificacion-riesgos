@@ -45,9 +45,9 @@ def procesar_respuestas(datos_generales, respuestas_riesgo, riesgo):
     if valores_numericos:
         indice_riesgo = sum(valores_numericos) / len(valores_numericos) * peso_factor
     else:
-        indice_riesgo = 0.5  # Valor por defecto si no hay datos numéricos positivos
+        indice_riesgo = None  # Devolver None si no hay datos positivos
     
-    return {"riesgo": riesgo, "indice": round(indice_riesgo, 2)}
+    return {"riesgo": riesgo, "indice": indice_riesgo}
 
 def main():
     st.title("Herramienta de Cuantificación de Riesgos")
@@ -74,7 +74,12 @@ def main():
     if st.button("Procesar Información"):
         st.subheader("Paso 4: Procesamiento de Respuestas")
         datos_procesados = procesar_respuestas(datos_generales, respuestas_riesgo, riesgo)
-        st.write("Datos procesados:", datos_procesados)
+        
+        # Solo mostrar el resultado si hay datos válidos
+        if datos_procesados["indice"] is not None:
+            st.write("Datos procesados:", datos_procesados)
+        else:
+            st.warning("Por favor, completa al menos un campo numérico antes de procesar.")
 
 if __name__ == "__main__":
     main()
