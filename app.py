@@ -3,6 +3,20 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Ponderación de sectores para cada riesgo
+SECTOR_PONDERACION = {
+    "Riesgo de Endeudamiento": {
+        "Infraestructura": 3, "Bienes Raíces": 3, "Energía": 3,
+        "Retail": 2, "Industria": 2, "Salud": 2, "Finanzas": 2,
+        "Tecnología": 1, "Consultoría": 1
+    },
+    "Riesgo de Ciberataque": {
+        "Finanzas": 3, "Salud": 3,
+        "Retail": 2, "Energía": 2, "Industria": 2,
+        "Bienes Raíces": 1, "Infraestructura": 1, "Tecnología": 1, "Consultoría": 1
+    }
+}
+
 def obtener_cuestionario(riesgo):
     respuestas = {}
 
@@ -19,36 +33,22 @@ def obtener_cuestionario(riesgo):
         respuestas["diversificacion_clientes"] = st.number_input("¿Cuántos clientes representan más del 50% de los ingresos?", min_value=0, step=1)
         respuestas["politicas_credito"] = st.selectbox("¿La empresa cuenta con políticas de crédito estrictas?", ["Sí", "No"])
     
-    elif riesgo == "Riesgo de Mercado":
-        respuestas["volatilidad_activos"] = st.number_input("¿Cuál es la volatilidad de los activos de la empresa? (%)", min_value=0.0, step=0.1)
-        respuestas["exposicion_divisas"] = st.selectbox("¿La empresa opera en múltiples divisas?", ["Sí", "No"])
-        respuestas["sensibilidad_tasa_interes"] = st.number_input("¿Cuánto afectarían las tasas de interés a los costos financieros? (%)", min_value=0.0, step=0.1)
-    
-    elif riesgo == "Riesgo de Endeudamiento":
-        respuestas["ratio_endeudamiento"] = st.number_input("¿Cuál es el ratio de endeudamiento actual? (%)", min_value=0.0, step=1.0)
-        respuestas["capacidad_pago"] = st.selectbox("¿La empresa tiene capacidad de pago a corto plazo?", ["Sí", "No"])
-        respuestas["cobertura_intereses"] = st.number_input("¿Cuál es la cobertura de intereses sobre deuda? (veces)", min_value=0.0, step=0.1)
-    
-    elif riesgo == "Riesgo de Ciberataque":
-        respuestas["ataques_recientes"] = st.selectbox("¿La empresa ha sufrido ciberataques en los últimos 12 meses?", ["Sí", "No"])
-        respuestas["proteccion_datos"] = st.selectbox("¿La empresa cuenta con cifrado de datos sensibles?", ["Sí", "No"])
-        respuestas["plan_respuesta"] = st.selectbox("¿Existe un plan de respuesta ante incidentes?", ["Sí", "No"])
-        respuestas["nivel_seguridad"] = st.selectbox("¿Cómo calificarías la seguridad informática de la empresa?", ["Baja", "Media", "Alta"])
-    
     return respuestas
 
 def procesar_respuestas(datos_generales, respuestas_riesgo, riesgo):
-    peso_factor = 0.2  # Ajustable según modelo real
-    
-    # Ahora se cuentan los valores numéricos, incluyendo 0
+    peso_factor = 0.2
     valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float))]
-
-    if len(valores_numericos) > 0:
-        indice_riesgo = sum(valores_numericos) / len(valores_numericos) * peso_factor
-    else:
-        indice_riesgo = None  # Si no hay datos, no procesar
     
-    return {"riesgo": riesgo, "indice": indice_riesgo}
+    # Ponderación del sector en el índice de riesgo
+    sector = datos_generales.get("sector")
+    sector_ponderacion = SECTOR_PONDERACION.get(riesgo, {}).get(sector, 1)
+    
+    if valores_numericos:
+        indice_riesgo = (sum(valores_numericos) / len(valores_numericos)) * peso_factor * sector_ponderacion
+    else:
+        indice_riesgo = None
+    
+    return {"riesgo": riesgo, "indice": round(indice_riesgo, 2) if indice_riesgo is not None else "Datos insuficientes"}
 
 def main():
     st.title("Herramienta de Cuantificación de Riesgos")
@@ -58,7 +58,7 @@ def main():
         "facturacion": st.number_input("Facturación anual (€)", min_value=0.0, step=10000.0),
         "sociedades": st.number_input("Número de sociedades que participan", min_value=1, step=1),
         "empleados": st.number_input("Número de empleados", min_value=1, step=1),
-        "sector": st.selectbox("Sector en el que opera", ["Finanzas", "Energía", "Retail", "Tecnología", "Salud", "Industria", "Otro"]),
+        "sector": st.selectbox("Sector en el que opera", ["Finanzas", "Energía", "Retail", "Tecnología", "Salud", "Industria", "Infraestructura", "Bienes Raíces", "Consultoría"]),
         "paises": st.number_input("Número de países en los que opera", min_value=1, step=1),
         "modelo_negocio": st.selectbox("Modelo de negocio", ["B2B", "B2C", "Mixto"]),
         "infraestructura": st.selectbox("Infraestructura tecnológica", ["Baja", "Media", "Alta"]),
@@ -71,16 +71,14 @@ def main():
     st.subheader("Paso 3: Cuestionario Específico del Riesgo")
     respuestas_riesgo = obtener_cuestionario(riesgo)
     
-    # Se añade un botón para procesar respuestas
     if st.button("Procesar Información"):
         st.subheader("Paso 4: Procesamiento de Respuestas")
         datos_procesados = procesar_respuestas(datos_generales, respuestas_riesgo, riesgo)
         
-        # Solo mostrar el resultado si hay datos válidos
-        if datos_procesados["indice"] is not None:
-            st.write("Datos procesados:", datos_procesados)
+        if isinstance(datos_procesados["indice"], str):
+            st.warning(datos_procesados["indice"])
         else:
-            st.warning("Por favor, completa al menos un campo del cuestionario antes de procesar.")
+            st.write("Datos procesados:", datos_procesados)
 
 if __name__ == "__main__":
     main()
