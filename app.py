@@ -40,12 +40,13 @@ def obtener_cuestionario(riesgo):
 def procesar_respuestas(datos_generales, respuestas_riesgo, riesgo):
     peso_factor = 0.2  # Ajustable según modelo real
     
-    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float)) and v > 0]
-    
-    if valores_numericos:
+    # Ahora se cuentan los valores numéricos, incluyendo 0
+    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float))]
+
+    if len(valores_numericos) > 0:
         indice_riesgo = sum(valores_numericos) / len(valores_numericos) * peso_factor
     else:
-        indice_riesgo = None  # Devolver None si no hay datos positivos
+        indice_riesgo = None  # Si no hay datos, no procesar
     
     return {"riesgo": riesgo, "indice": indice_riesgo}
 
@@ -79,7 +80,7 @@ def main():
         if datos_procesados["indice"] is not None:
             st.write("Datos procesados:", datos_procesados)
         else:
-            st.warning("Por favor, completa al menos un campo numérico antes de procesar.")
+            st.warning("Por favor, completa al menos un campo del cuestionario antes de procesar.")
 
 if __name__ == "__main__":
     main()
