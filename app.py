@@ -70,10 +70,11 @@ def main():
     st.subheader("Paso 3: Cuestionario Específico del Riesgo")
     respuestas_riesgo = obtener_cuestionario(riesgo)
     
-    st.subheader("Paso 4: Procesamiento de Respuestas")
-    datos_procesados = procesar_respuestas(datos_generales, respuestas_riesgo, riesgo)
-    st.write("Datos procesados:", datos_procesados)
+    # Se añade un botón para procesar respuestas
+    if st.button("Procesar Información"):
+        st.subheader("Paso 4: Procesamiento de Respuestas")
+        datos_procesados = procesar_respuestas(datos_generales, respuestas_riesgo, riesgo)
+        st.write("Datos procesados:", datos_procesados)
 
 if __name__ == "__main__":
     main()
-
