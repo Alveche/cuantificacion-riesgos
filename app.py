@@ -3,19 +3,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Ponderación de sectores para cada riesgo
-SECTOR_PONDERACION = {
-    "Riesgo de Endeudamiento": {
-        "Infraestructura": 3, "Bienes Raíces": 3, "Energía": 3,
-        "Retail": 2, "Industria": 2, "Salud": 2, "Finanzas": 2,
-        "Tecnología": 1, "Consultoría": 1
-    },
-    "Riesgo de Ciberataque": {
-        "Finanzas": 3, "Salud": 3,
-        "Retail": 2, "Energía": 2, "Industria": 2,
-        "Bienes Raíces": 1, "Infraestructura": 1, "Tecnología": 1, "Consultoría": 1
-    }
-}
 
 def obtener_cuestionario(riesgo):
     respuestas = {}
