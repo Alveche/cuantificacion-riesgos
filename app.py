@@ -51,17 +51,11 @@ def obtener_cuestionario(riesgo):
     
     return respuestas
 
-def convertir_categoricas(respuestas):
-    conversion = {"Sí": 1, "No": 3, "AAA": 1, "AA": 2, "A": 3, "BBB": 4, "BB": 5, "B": 6, "C": 7, "Baja": 3, "Media": 2, "Alta": 1}
-    return {k: conversion.get(v, v) for k, v in respuestas.items()}
-
 def procesar_respuestas(datos_generales, respuestas_riesgo, riesgo):
     peso_factor = 0.2
-    respuestas_riesgo = convertir_categoricas(respuestas_riesgo)
-    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float))]
-    
     sector = datos_generales.get("sector")
     sector_ponderacion = SECTOR_PONDERACION.get(riesgo, {}).get(sector, 1)
+    valores_numericos = [v for v in respuestas_riesgo.values() if isinstance(v, (int, float))]
     
     if valores_numericos:
         indice_riesgo = (sum(valores_numericos) / len(valores_numericos)) * peso_factor * sector_ponderacion
@@ -76,7 +70,10 @@ def main():
     st.subheader("Paso 1: Datos Generales de la Compañía")
     datos_generales = {"sector": st.selectbox("Sector en el que opera", list(SECTOR_PONDERACION["Riesgo de Endeudamiento"].keys()))}
     
+    st.subheader("Paso 2: Selección del Riesgo a Cuantificar")
     riesgo = st.selectbox("¿Qué riesgo quieres cuantificar?", list(SECTOR_PONDERACION.keys()))
+    
+    st.subheader("Paso 3: Cuestionario Específico del Riesgo")
     respuestas_riesgo = obtener_cuestionario(riesgo)
     
     if st.button("Procesar Información"):
@@ -86,4 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
